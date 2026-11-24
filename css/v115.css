@@ -1,0 +1,425 @@
+/* ============================================================
+   AURELIS MARKETS — v1.15 polish layer
+   Phiên giao dịch · zoom biểu đồ · bảng giá · vi tương tác
+   Loaded after v114.css — chỉ bổ sung giao diện, không đổi layout gốc,
+   không override màu của các theme có sẵn.
+   ============================================================ */
+
+/* ---------------------- TRẠNG THÁI DÙNG CHUNG ---------------------- */
+/* Mỗi vùng tự đặt --v115-state; các modifier có specificity cao hơn base. */
+.session-status.open, .session-pill.open, .session-card.open,
+.order-session-note.open, .session-hint.open {
+  --v115-state: var(--up, #2ee6a6);
+}
+.session-status.break, .session-pill.break, .session-card.break,
+.order-session-note.break {
+  --v115-state: var(--orange, #ff9f43);
+}
+.session-status.closed, .session-pill.closed, .session-card.closed,
+.order-session-note.closed, .session-hint.closed {
+  --v115-state: var(--muted, #8798a0);
+}
+
+/* --------------------------- TOPBAR STATUS --------------------------- */
+.session-status {
+  --v115-state: var(--muted, #8798a0);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 31px;
+  padding: 0 9px;
+  flex: none;
+  border: 1px solid color-mix(in srgb, var(--v115-state) 26%, var(--line, rgba(255, 255, 255, .075)));
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--v115-state) 7%, rgba(255, 255, 255, .02));
+  color: var(--v115-state);
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  white-space: nowrap;
+  transition: background .22s ease, border-color .22s ease, color .22s ease;
+}
+.session-status::before { content: ""; width: 5px; height: 5px; flex: none; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px color-mix(in srgb, var(--v115-state) 55%, transparent); }
+.session-status [data-ss-label] { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.session-status [data-ss-time] { padding-left: 6px; border-left: 1px solid var(--line, rgba(255, 255, 255, .075)); font-family: var(--font-mono, monospace); font-size: 7.6px; font-weight: 500; letter-spacing: 0; color: var(--muted, #8798a0); }
+.topbar-right > .session-status { flex: none; }
+
+/* ---------------------------- SESSION PILL ---------------------------- */
+.session-pill {
+  --v115-state: var(--muted, #8798a0);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  vertical-align: middle;
+  border: 1px solid color-mix(in srgb, var(--v115-state) 28%, var(--line, rgba(255, 255, 255, .075)));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--v115-state) 9%, rgba(255, 255, 255, .018));
+  color: var(--v115-state);
+  font-family: var(--font-mono, monospace);
+  font-size: 7px;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: .01em;
+  white-space: nowrap;
+  transition: background .18s ease, border-color .18s ease, color .18s ease;
+}
+.session-pill .sp-dot { width: 5px; height: 5px; flex: none; border-radius: 50%; background: currentColor; box-shadow: 0 0 6px color-mix(in srgb, var(--v115-state) 45%, transparent); }
+.session-pill.compact { padding: 1px 5px; font-size: 6.6px; }
+.session-pill.open { box-shadow: inset 0 0 10px color-mix(in srgb, var(--v115-state) 8%, transparent); }
+.session-pill.closed { opacity: .82; }
+/* Đứng cạnh badge / exchange-tag mà không đẩy dòng */
+.terminal-symbol-row .session-pill,
+.asset-meta .session-pill,
+.market-session-cell .session-pill { max-width: 100%; }
+
+/* ---------------------------- SESSION BOARD ---------------------------- */
+.session-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(208px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.session-card {
+  --v115-state: var(--muted, #8798a0);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  padding: 12px 13px;
+  border: 1px solid var(--line, rgba(255, 255, 255, .075));
+  border-radius: 13px;
+  background:
+    radial-gradient(260px 120px at 100% 0%, color-mix(in srgb, var(--v115-state) 10%, transparent), transparent 70%),
+    var(--panel-solid, var(--surface-solid, #0c161e));
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--v115-state) 6%, transparent);
+  overflow: hidden;
+  transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease;
+}
+.session-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--v115-state), transparent);
+  opacity: .5;
+  pointer-events: none;
+}
+.session-card.open {
+  border-color: color-mix(in srgb, var(--v115-state) 36%, var(--line));
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--v115-state) 10%, transparent), inset 0 1px 0 rgba(255, 255, 255, .04);
+}
+.session-card.break { border-color: color-mix(in srgb, var(--v115-state) 30%, var(--line)); }
+.session-card.closed {
+  border-style: dashed;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .015), transparent 70%), var(--panel-solid, var(--surface-solid, #0c161e));
+  box-shadow: none;
+}
+.session-card:hover { transform: translateY(-2px); }
+.sc-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
+.sc-name {
+  min-width: 0;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  color: var(--text, #eaf2ef);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sc-dot { width: 7px; height: 7px; flex: none; border-radius: 50%; background: var(--v115-state); box-shadow: 0 0 0 3px color-mix(in srgb, var(--v115-state) 12%, transparent), 0 0 10px color-mix(in srgb, var(--v115-state) 40%, transparent); }
+.sc-state {
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -.03em;
+  color: var(--v115-state);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sc-meta { font-size: 8px; color: var(--text-soft, #c7d5d1); }
+.sc-venue {
+  margin-top: auto;
+  padding-top: 6px;
+  border-top: 1px dashed var(--line, rgba(255, 255, 255, .075));
+  font-size: 7px;
+  letter-spacing: .04em;
+  color: var(--dim, #5c6b73);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --------------------------- SESSION NOTE --------------------------- */
+.order-session-note {
+  --v115-state: var(--muted, #8798a0);
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 0 0 12px;
+  padding: 9px 10px;
+  border: 1px solid color-mix(in srgb, var(--v115-state) 22%, var(--line, rgba(255, 255, 255, .075)));
+  border-radius: 10px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--v115-state) 8%, transparent), rgba(255, 255, 255, .012));
+}
+.modal .order-session-note { margin: 0 0 12px; }
+.sn-dot { width: 7px; height: 7px; margin-top: 4px; flex: none; border-radius: 50%; background: var(--v115-state); box-shadow: 0 0 0 3px color-mix(in srgb, var(--v115-state) 12%, transparent), 0 0 10px color-mix(in srgb, var(--v115-state) 32%, transparent); }
+.sn-body { min-width: 0; font-size: 8px; line-height: 1.55; color: var(--muted, #8798a0); }
+.sn-body b { display: block; font-size: 9px; color: var(--text, #eaf2ef); }
+.sn-body span { display: block; margin-top: 2px; }
+.sn-body em { display: block; margin-top: 2px; font-style: normal; font-size: 7.4px; color: var(--dim, #5c6b73); }
+.sn-body b[data-session-countdown] {
+  display: inline;
+  font-family: var(--font-mono, monospace);
+  font-weight: 700;
+  color: var(--v115-state);
+}
+.session-hint { display: inline-block; margin-top: 3px; font-weight: 600; }
+.session-hint.open { color: var(--up, #2ee6a6); }
+.session-hint.closed { color: var(--muted, #8798a0); }
+
+/* ---------------------------- CHART ZOOM ---------------------------- */
+.chart-expand-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.chart-zoom-group { display: inline-flex; align-items: center; gap: 2px; padding: 2px; border: 1px solid var(--line, rgba(255, 255, 255, .075)); border-radius: 8px; background: rgba(0, 0, 0, .18); }
+.chart-zoom-btn { display: grid; place-items: center; width: 24px; height: 22px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: var(--muted, #8798a0); font-family: inherit; cursor: pointer; transition: background .16s ease, color .16s ease, box-shadow .16s ease; }
+.chart-zoom-btn .icon { width: 13px; height: 13px; }
+.chart-zoom-btn:hover { background: rgba(255, 255, 255, .06); color: var(--text, #eaf2ef); }
+.chart-zoom-btn.active,
+.chart-zoom-btn[aria-pressed="true"] {
+  background: var(--gold-soft, rgba(243, 197, 107, .12));
+  color: var(--gold, #f3c56b);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold, #f3c56b) 24%, transparent);
+}
+/* Nút thoát nổi — chỉ hiển thị khi chart đang mở rộng */
+.chart-exit-btn {
+  display: none;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 9px;
+  position: absolute;
+  top: 9px;
+  right: 10px;
+  z-index: 4;
+  border: 1px solid var(--line-strong, rgba(255, 255, 255, .14));
+  border-radius: 8px;
+  background: rgba(10, 16, 21, .88);
+  color: var(--muted, #8798a0);
+  font-family: inherit;
+  font-size: 8.5px;
+  font-weight: 700;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  transition: color .16s ease, background .16s ease, border-color .16s ease;
+}
+.chart-exit-btn .icon { width: 13px; height: 13px; }
+.chart-exit-btn:hover { color: var(--text, #eaf2ef); background: rgba(255, 255, 255, .09); }
+
+.chart-card.is-expanded {
+  position: fixed;
+  inset: 12px;
+  z-index: 180; /* trên topbar/sidebar, dưới modal (200) và toast (250) */
+  width: auto;
+  height: auto;
+  max-height: none;
+  display: flex;
+  flex-direction: column;
+  border-color: color-mix(in srgb, var(--gold, #f3c56b) 26%, var(--line));
+  border-radius: 18px;
+  background: radial-gradient(680px 260px at 100% -10%, var(--glow-a, rgba(243, 197, 107, .085)), transparent 64%),
+              var(--panel-solid, var(--surface-solid, #0c161e));
+  box-shadow: 0 32px 90px rgba(0, 0, 0, .68), inset 0 1px 0 rgba(255, 255, 255, .05);
+}
+.chart-card.is-expanded .chart-head { padding-right: 54px; flex: none; }
+.chart-card.is-expanded .chart-exit-btn { display: inline-flex; }
+.chart-card.is-expanded .chart-toolbar { flex: none; }
+.chart-card.is-expanded .chart-foot { flex: none; }
+.chart-card.is-expanded .chart-reader { max-height: 24vh; overflow-y: auto; flex: 0 1 auto; }
+.chart-card.is-expanded .chart-canvas-wrap {
+  height: calc(100vh - 220px);
+  min-height: 300px;
+  flex: 1 1 auto;
+}
+@supports (height: 100dvh) {
+  .chart-card.is-expanded .chart-canvas-wrap { height: calc(100dvh - 220px); }
+}
+/* Khoá nền khi mở rộng (browsers hỗ trợ :has; bỏ qua nếu không hỗ trợ) */
+body:has(.chart-card.is-expanded) { overflow: hidden; }
+
+.chart-canvas-wrap { transition: height .28s cubic-bezier(.2, .8, .25, 1); }
+.chart-toolbar { row-gap: 7px; }
+.chart-toolbar > * { flex: none; }
+.chart-head-right { row-gap: 6px; }
+
+/* -------------------------- ANALYSIS TOOLS -------------------------- */
+.ind-btn[data-ind="vwap"] { --ib-color: var(--cyan, #5ac8fa); }
+.ind-btn[data-ind="ma50"] { --ib-color: var(--purple, #b59cff); }
+.ind-btn[data-ind="vwap"],
+.ind-btn[data-ind="ma50"] {
+  color: color-mix(in srgb, var(--ib-color) 68%, var(--muted, #8798a0));
+}
+.ind-btn[data-ind="vwap"]:hover,
+.ind-btn[data-ind="ma50"]:hover { color: var(--ib-color); }
+.ind-btn[data-ind="vwap"].active,
+.ind-btn[data-ind="ma50"].active {
+  color: var(--ib-color);
+  border-color: color-mix(in srgb, var(--ib-color) 38%, transparent);
+  background: color-mix(in srgb, var(--ib-color) 12%, transparent);
+}
+.chart-osc-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+.chart-osc-wrap > label,
+.chart-osc-wrap > span {
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  color: var(--dim, #5c6b73);
+  white-space: nowrap;
+}
+.chart-osc-wrap .select { flex: none; }
+
+.chart-reader {
+  border-top-color: color-mix(in srgb, var(--gold, #f3c56b) 14%, var(--line, rgba(255, 255, 255, .075)));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--gold, #f3c56b) 4%, transparent), transparent 62%);
+}
+.reader-head { padding: 10px 13px 7px; }
+.reader-head .reader-toggle { letter-spacing: .02em; }
+.reader-tabs { row-gap: 6px; margin: 9px 0 8px; }
+.reader-tab { min-height: 23px; }
+.reader-tab.active { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold, #f3c56b) 20%, transparent); }
+.reader-body { position: relative; scrollbar-width: thin; }
+.chart-hover-info { align-items: baseline; row-gap: 3px; }
+.chart-hover-info > span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  min-width: 0;
+}
+
+/* ----------------------------- MARKETS ----------------------------- */
+.market-summary { align-items: stretch; }
+.summary-card {
+  position: relative;
+  overflow: hidden;
+  transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease;
+}
+.summary-card::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gold, #f3c56b) 35%, transparent), transparent);
+  opacity: .55;
+  pointer-events: none;
+}
+.summary-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--gold, #f3c56b) 22%, var(--line));
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .22);
+}
+.market-filters { row-gap: 6px; }
+.market-filters .chip { flex: none; }
+.market-table-card {
+  border-color: color-mix(in srgb, var(--line-strong, rgba(255, 255, 255, .14)) 55%, transparent);
+}
+.market-session-head {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-align: left;
+  white-space: nowrap;
+}
+.market-session-cell { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.market-session-cell .session-pill { max-width: 100%; }
+.market-session-cell .exchange-tag { flex: none; }
+/* Cột mới tự co nội dung, không ẩn cột có sẵn */
+.market-table-card .data-table th:has(.market-session-head),
+.market-table-card .data-table td:has(.market-session-cell) { white-space: nowrap; }
+
+/* -------------------------- GENERAL POLISH -------------------------- */
+.card { border-color: color-mix(in srgb, var(--line, rgba(255, 255, 255, .075)) 85%, transparent); }
+.card:not(.chart-card):not(.order-panel):not(.market-table-card):hover {
+  transform: translateY(-1px);
+}
+body, .topbar, .sidebar, .card, .market-status, .avatar {
+  transition: background-color .26s ease, background .26s ease, border-color .26s ease,
+              color .26s ease, box-shadow .26s ease;
+}
+:where(.session-pill, .chart-zoom-btn, .chart-exit-btn, .chart-expand-wrap .btn, .reader-tab):focus-visible {
+  outline: 2px solid var(--gold, #f3c56b);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px var(--gold-soft, rgba(243, 197, 107, .12));
+}
+:where(.session-board, .chart-reader, .chart-card.is-expanded .chart-reader, .market-filters, .table-wrap) {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--gold, #f3c56b) 22%, transparent) transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(color-mix(in srgb, var(--gold, #f3c56b) 18%, rgba(255, 255, 255, .14)),
+                              color-mix(in srgb, var(--gold, #f3c56b) 8%, rgba(255, 255, 255, .06)));
+  background-clip: padding-box;
+}
+
+/* ---------------------------- RESPONSIVE ---------------------------- */
+@media (max-width: 1200px) {
+  .session-board { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
+  .chart-card.is-expanded .chart-head { padding-right: 48px; }
+  .chart-card.is-expanded .chart-head-right { width: 100%; margin-left: 0; }
+  .market-session-cell .session-pill:not(.compact) { max-width: 118px; overflow: hidden; text-overflow: ellipsis; }
+}
+@media (max-width: 720px) {
+  .session-status { padding: 0 7px; gap: 5px; }
+  .session-status [data-ss-time] { display: none; }
+}
+@media (max-width: 640px) {
+  .chart-card.is-expanded { inset: 0; border-radius: 0; border-left: 0; border-right: 0; }
+  .chart-card.is-expanded .chart-head { padding: 9px 12px 7px 48px; }
+  .chart-card.is-expanded .chart-canvas-wrap {
+    height: clamp(220px, calc(100dvh - 250px), 70dvh);
+    min-height: 220px;
+  }
+  .chart-card.is-expanded .chart-reader { max-height: 20vh; }
+  .chart-toolbar { padding: 7px 9px; }
+  .chart-toolbar .draw-sep { display: none; }
+  .order-session-note { padding: 8px; }
+  .session-board { gap: 8px; }
+  .session-card { padding: 10px; }
+  .sc-state { font-size: 12px; }
+  .market-filters { overflow-x: visible; }
+}
+@media (max-width: 420px) {
+  .session-board { grid-template-columns: 1fr; }
+  .session-pill:not(.compact) { font-size: 6.6px; }
+  .chart-exit-btn { padding: 0 7px; font-size: 0; }
+  .chart-exit-btn .icon { width: 15px; height: 15px; }
+}
+
+/* ------------------------ REDUCED MOTION ------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+  .session-card, .session-card:hover, .summary-card, .summary-card:hover,
+  .card, .card:hover, .chart-card, .chart-card.is-expanded,
+  .session-pill, .chart-zoom-btn, .chart-exit-btn {
+    transform: none !important;
+    transition-duration: .001ms !important;
+  }
+  .session-status::before, .sp-dot, .sc-dot, .sn-dot { animation: none !important; }
+}
